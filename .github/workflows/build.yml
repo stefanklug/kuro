@@ -14,14 +14,14 @@ jobs:
     # create a build matrix for jobs
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
 
     steps:
       - name: ⚙️ Check out Git repository
         uses: actions/checkout@v4
 
       - name: ⚙️📦️ Build(Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm'
         run: |
           docker run --rm \
           --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') \
@@ -33,7 +33,7 @@ jobs:
           -v ~/.cache/electron-builder:/root/.cache/electron-builder \
           electronuserland/builder \
           /bin/bash -c "yarn install && yarn icons && yarn run electron-builder --publish never"
-      
+
       - name: ⚙️📦️ Build(Windows)
         if: matrix.os == 'windows-latest'
         run: yarn install && yarn icons && yarn run electron-builder --publish never
