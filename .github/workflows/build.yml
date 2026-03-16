@@ -14,13 +14,13 @@ jobs:
     # create a build matrix for jobs
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
 
     steps:
       - name: ⚙️ Check out Git repository
         uses: actions/checkout@v4
 
-      - name: ⚙️📦️ Build(Linux)
+      - name: ⚙️📦️ Build(Linux x64)
         if: matrix.os == 'ubuntu-latest'
         run: |
           docker run --rm \
@@ -32,8 +32,18 @@ jobs:
           -v ~/.cache/electron:/root/.cache/electron \
           -v ~/.cache/electron-builder:/root/.cache/electron-builder \
           electronuserland/builder \
-          /bin/bash -c "yarn install && yarn icons && yarn run electron-builder --publish never"
-      
+          /bin/bash -c "yarn install && yarn icons && yarn run electron-builder --x64 --publish never"
+
+      - name: ⚙️ Setup Node.js
+        if: matrix.os == 'ubuntu-24.04-arm'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: ⚙️📦️ Build(Linux aarch64)
+        if: matrix.os == 'ubuntu-24.04-arm'
+        run: yarn install && yarn icons && yarn run electron-builder --arm64 --publish never
+
       - name: ⚙️📦️ Build(Windows)
         if: matrix.os == 'windows-latest'
         run: yarn install && yarn icons && yarn run electron-builder --publish never
